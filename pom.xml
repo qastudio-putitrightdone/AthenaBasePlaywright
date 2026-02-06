@@ -6,7 +6,7 @@
 
     <groupId>org.athena.playwright</groupId>
     <artifactId>baseplaywright</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <packaging>pom</packaging>
     <modules>
         <module>base</module>

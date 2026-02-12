@@ -91,6 +91,7 @@ public class LaunchBrowser {
     public List<Object> initiateBrowserAndApplication(String browserToLaunch, String applicationUrl) {
         List<Object> browserObjects = getBrowserPage(browserToLaunch);
         page = (Page) browserObjects.get(2);
+        page.navigate(applicationUrl);
         return browserObjects;
     }
 

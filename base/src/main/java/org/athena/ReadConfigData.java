@@ -28,4 +28,8 @@ public class ReadConfigData {
             throw new RuntimeException(e);
         }
     }
+
+    public Properties fetchConfigData(String filePath) {
+        return getConfigData(filePath);
+    }
 }

@@ -80,7 +80,7 @@ public class LaunchBrowser {
                     .setArgs(Arrays.asList("--start-maximized")));
         }
         browserContext = browser.newContext(new Browser.NewContextOptions().setViewportSize(width, height)
-                .setIgnoreHTTPSErrors(true));
+                .setIgnoreHTTPSErrors(true).setViewportSize(null));
         page = browserContext.newPage();
         playwrightsObjects.add(playwright);
         playwrightsObjects.add(browserContext);

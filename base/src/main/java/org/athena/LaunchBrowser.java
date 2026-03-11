@@ -85,6 +85,7 @@ public class LaunchBrowser {
         playwrightsObjects.add(playwright);
         playwrightsObjects.add(browserContext);
         playwrightsObjects.add(page);
+        playwrightsObjects.add(browser);
         return playwrightsObjects;
     }
 

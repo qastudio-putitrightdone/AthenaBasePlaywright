@@ -89,7 +89,7 @@ public class LaunchBrowser {
         return playwrightsObjects;
     }
 
-    public List<Object> getBrowserPage(String browserToLaunch, Path storageStatePath) {
+    private List<Object> getBrowserPage(String browserToLaunch, Path storageStatePath) {
         List<Object> playwrightsObjects = new ArrayList<>();
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         int width = (int)screenSize.getWidth();
@@ -136,6 +136,13 @@ public class LaunchBrowser {
 
     public List<Object> initiateBrowserAndApplication(String browserToLaunch, String applicationUrl) {
         List<Object> browserObjects = getBrowserPage(browserToLaunch);
+        page = (Page) browserObjects.get(2);
+        page.navigate(applicationUrl);
+        return browserObjects;
+    }
+
+    public List<Object> initiateBrowserAndApplication(String browserToLaunch, String applicationUrl, Path storageStatePath) {
+        List<Object> browserObjects = getBrowserPage(browserToLaunch, storageStatePath);
         page = (Page) browserObjects.get(2);
         page.navigate(applicationUrl);
         return browserObjects;

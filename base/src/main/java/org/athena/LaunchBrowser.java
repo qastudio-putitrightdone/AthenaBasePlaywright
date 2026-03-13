@@ -89,6 +89,51 @@ public class LaunchBrowser {
         return playwrightsObjects;
     }
 
+    public List<Object> getBrowserPage(String browserToLaunch, Path storageStatePath) {
+        List<Object> playwrightsObjects = new ArrayList<>();
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        int width = (int)screenSize.getWidth();
+        int height = (int)screenSize.getHeight();
+        String filePath = System.getProperty("user.dir");
+        Path downloadDir = Paths.get(
+                filePath,
+                "src", "test", "resources", "downloads"
+        );
+
+        playwright = Playwright.create();
+        String browserName = getBrowser(browserToLaunch).name();
+        if (browserName.equals(browserNames.CHROMIUM.name())) {
+            browserType = playwright.chromium();
+            browser = browserType.launch(new BrowserType.LaunchOptions().setHeadless(false));
+        } else if (browserName.equals(browserNames.FIREFOX.name())) {
+            browserType = playwright.firefox();
+            browser = browserType.launch(new BrowserType.LaunchOptions().setHeadless(false)
+                    .setArgs(Arrays.asList("--start-maximized")));
+        } else if (browserName.equals(browserNames.CHROME.name())) {
+            browserType = playwright.chromium();
+            browser = browserType.launch(new BrowserType.LaunchOptions()
+                    .setChannel("chrome")
+                    .setHeadless(false)
+                    .setDownloadsPath(downloadDir)
+                    .setArgs(Arrays.asList("--start-maximized")));
+        } else if (browserName.equals(browserNames.EDGE.name())) {
+            browserType = playwright.chromium();
+            browser = browserType.launch(new BrowserType.LaunchOptions()
+                    .setChannel("msedge")
+                    .setHeadless(false)
+                    .setDownloadsPath(downloadDir)
+                    .setArgs(Arrays.asList("--start-maximized")));
+        }
+        browserContext = browser.newContext(new Browser.NewContextOptions().setViewportSize(width, height)
+                .setIgnoreHTTPSErrors(true).setViewportSize(null).setStorageStatePath(storageStatePath));
+        page = browserContext.newPage();
+        playwrightsObjects.add(playwright);
+        playwrightsObjects.add(browserContext);
+        playwrightsObjects.add(page);
+        playwrightsObjects.add(browser);
+        return playwrightsObjects;
+    }
+
     public List<Object> initiateBrowserAndApplication(String browserToLaunch, String applicationUrl) {
         List<Object> browserObjects = getBrowserPage(browserToLaunch);
         page = (Page) browserObjects.get(2);

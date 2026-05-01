@@ -101,6 +101,27 @@ public class BasePage {
         return false;
     }
 
+    public <T> boolean waitForElementToDisplayWTThrow(T arg, Double timeoutInSeconds) {
+        if (arg instanceof String) {
+            try {
+                page.waitForCondition(() -> page.locator((String) arg).isVisible(),
+                        new Page.WaitForConditionOptions().setTimeout(timeoutInSeconds));
+                return true;
+            } catch (TimeoutError e) {
+                return false;
+            }
+        } else if (arg instanceof Locator) {
+            try {
+                page.waitForCondition(() -> ((Locator) arg).isVisible(),
+                        new Page.WaitForConditionOptions().setTimeout(timeoutInSeconds));
+                return true;
+            } catch (TimeoutError e) {
+                return false;
+            }
+        }
+        return false;
+    }
+
     public Locator waitForElementToDisplay(String locatorText) {
         page.waitForCondition(() -> page.getByText(locatorText, new Page.GetByTextOptions().setExact(true)).isVisible());
         return page.getByText(locatorText, new Page.GetByTextOptions().setExact(true));

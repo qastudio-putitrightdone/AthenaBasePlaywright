@@ -80,6 +80,41 @@ public class BasePage {
         return false;
     }
 
+    public <T> boolean waitForElementToDisplay(T arg, Double timeoutInSeconds) {
+        if (arg instanceof String) {
+            try {
+                page.waitForCondition(() -> page.locator((String) arg).isVisible(),
+                        new Page.WaitForConditionOptions().setTimeout(timeoutInSeconds));
+                return true;
+            } catch (TimeoutError e) {
+                throw new RuntimeException("Element with locator: " + arg + " was not visible within the timeout period.");
+            }
+        } else if (arg instanceof Locator) {
+            try {
+                page.waitForCondition(() -> ((Locator) arg).isVisible(),
+                        new Page.WaitForConditionOptions().setTimeout(timeoutInSeconds));
+                return true;
+            } catch (TimeoutError e) {
+                throw new RuntimeException("Element with locator: " + arg + " was not visible within the timeout period.");
+            }
+        }
+        return false;
+    }
+
+    public Locator waitForElementToDisplay(String locatorText) {
+        page.waitForCondition(() -> page.getByText(locatorText, new Page.GetByTextOptions().setExact(true)).isVisible());
+        return page.getByText(locatorText, new Page.GetByTextOptions().setExact(true));
+    }
+
+    public void waitForElementToDisappear(String locatorText) {
+        page.waitForCondition(() -> !page.getByText(locatorText, new Page.GetByTextOptions().setExact(true)).isVisible());
+    }
+
+    public Locator waitForElementWithTimeout(String locatorText, Double timeoutInSeconds) {
+        page.waitForCondition(() -> page.getByText(locatorText).isVisible(), new Page.WaitForConditionOptions().setTimeout(timeoutInSeconds));
+        return page.getByText(locatorText, new Page.GetByTextOptions().setExact(true));
+    }
+
     public void waitForPageLoad() {
         try {
             page.waitForLoadState(LoadState.NETWORKIDLE);

@@ -7,6 +7,7 @@ import com.microsoft.playwright.options.LoadState;
 import io.qameta.allure.Allure;
 
 import java.io.ByteArrayInputStream;
+import java.util.List;
 
 public class BasePage {
 
@@ -67,14 +68,14 @@ public class BasePage {
                 page.waitForCondition(() -> page.locator((String) arg).isVisible());
                 return true;
             } catch (TimeoutError e) {
-                throw new RuntimeException("Element with locator: " + arg + " was not visible within the timeout period.");
+                throw new LocatorNotFoundException("Element with locator: " + arg + " was not visible within the timeout period.");
             }
         } else if (arg instanceof Locator) {
             try {
                 page.waitForCondition(() -> ((Locator) arg).isVisible());
                 return true;
             } catch (TimeoutError e) {
-                throw new RuntimeException("Element with locator: " + arg + " was not visible within the timeout period.");
+                throw new LocatorNotFoundException("Element with locator: " + arg + " was not visible within the timeout period.");
             }
         }
         return false;
@@ -87,7 +88,7 @@ public class BasePage {
                         new Page.WaitForConditionOptions().setTimeout(timeoutInSeconds));
                 return true;
             } catch (TimeoutError e) {
-                throw new RuntimeException("Element with locator: " + arg + " was not visible within the timeout period.");
+                throw new LocatorNotFoundException("Element with locator: " + arg + " was not visible within the timeout period.");
             }
         } else if (arg instanceof Locator) {
             try {
@@ -95,7 +96,7 @@ public class BasePage {
                         new Page.WaitForConditionOptions().setTimeout(timeoutInSeconds));
                 return true;
             } catch (TimeoutError e) {
-                throw new RuntimeException("Element with locator: " + arg + " was not visible within the timeout period.");
+                throw new LocatorNotFoundException("Element with locator: " + arg + " was not visible within the timeout period.");
             }
         }
         return false;
@@ -145,7 +146,12 @@ public class BasePage {
     }
 
     public void waitForUrlToContain(String urlFragment) {
-        page.waitForURL(url -> url.contains(urlFragment));
+        try {
+            page.waitForURL(url -> url.contains(urlFragment));
+        } catch (TimeoutError e) {
+            Allure.step("URL did not contain the expected fragment within the timeout period.");
+            throw new FailedToLoadPageException("URL did not contain the expected fragment within the timeout period.");
+        }
     }
 
     public <T> void typeIntoElement(T arg, String textToType) {
@@ -171,6 +177,26 @@ public class BasePage {
             return page.locator((String) arg).filter(new Locator.FilterOptions().setHasText(filterText));
         } else if (arg instanceof Locator) {
             return ((Locator) arg).filter(new Locator.FilterOptions().setHasText(filterText));
+        }
+
+        return null;
+    }
+
+    public <T> List<Locator> getChildLocators(T arg, Locator childLocator) {
+        if (arg instanceof String) {
+            return page.locator((String) arg).locator(childLocator).all();
+        } else if (arg instanceof Locator) {
+            return ((Locator) arg).locator(childLocator).all();
+        }
+
+        return null;
+    }
+
+    public <T> List<Locator> getChildLocators(T arg, String childLocator) {
+        if (arg instanceof String) {
+            return page.locator((String) arg).locator(childLocator).all();
+        } else if (arg instanceof Locator) {
+            return ((Locator) arg).locator(childLocator).all();
         }
 
         return null;

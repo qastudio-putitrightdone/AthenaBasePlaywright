@@ -143,4 +143,36 @@ public class BasePage {
             Allure.step("Failed to load the page within the timeout period.");
         }
     }
+
+    public void waitForUrlToContain(String urlFragment) {
+        page.waitForURL(url -> url.contains(urlFragment));
+    }
+
+    public <T> void typeIntoElement(T arg, String textToType) {
+        if (arg instanceof String) {
+            page.locator((String) arg).clear();
+            page.locator((String) arg).fill(textToType);
+        } else if (arg instanceof Locator) {
+            ((Locator) arg).clear();
+            ((Locator) arg).fill(textToType);
+        }
+    }
+
+    public <T> void clickElement(T arg) {
+        if (arg instanceof String) {
+            page.locator((String) arg).click();
+        } else if (arg instanceof Locator) {
+            ((Locator) arg).click();
+        }
+    }
+
+    public <T> Locator filterLocator(T arg, String filterText) {
+        if (arg instanceof String) {
+            return page.locator((String) arg).filter(new Locator.FilterOptions().setHasText(filterText));
+        } else if (arg instanceof Locator) {
+            return ((Locator) arg).filter(new Locator.FilterOptions().setHasText(filterText));
+        }
+
+        return null;
+    }
 }

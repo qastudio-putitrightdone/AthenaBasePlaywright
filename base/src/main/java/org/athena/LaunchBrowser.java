@@ -141,6 +141,12 @@ public class LaunchBrowser {
         return browserObjects;
     }
 
+    public List<Object> initiateBrowser(String browserToLaunch) {
+        List<Object> browserObjects = getBrowserPage(browserToLaunch);
+        page = (Page) browserObjects.get(2);
+        return browserObjects;
+    }
+
     public List<Object> initiateBrowserAndApplication(String browserToLaunch, String applicationUrl, Path storageStatePath) {
         List<Object> browserObjects = getBrowserPage(browserToLaunch, storageStatePath);
         page = (Page) browserObjects.get(2);

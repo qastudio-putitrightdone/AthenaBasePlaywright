@@ -12,11 +12,13 @@ Add the `base` module as a dependency:
 
 ```xml
 <dependency>
-    <groupId>org.athena.playwright</groupId>
+    <groupId>io.github.qastudio-putitrightdone</groupId>
     <artifactId>base</artifactId>
     <version>1.1.0</version>
 </dependency>
 ```
+
+It is published on Maven Central, so no extra repository or token is needed.
 
 Playwright and Gson come in transitively. Do not redeclare them with a different version in the consuming framework, or you can end up with a driver and browser mismatch.
 
@@ -99,6 +101,22 @@ APIInterceptor.clearMocks(page);   // removes every mock and patch on the page
 ```
 
 If several routes match the same URL, the most recently registered one runs first.
+
+## Releasing to Maven Central
+
+Publishing is done by `.github/workflows/publish.yml` when a GitHub release is published (or run manually from the Actions tab).
+
+One-time setup:
+
+1. Create an account at <https://central.sonatype.com> and register the namespace `io.github.qastudio-putitrightdone` (verified by creating the temporary repo Central asks for in the GitHub org).
+2. Generate a user token there (Account > Generate User Token).
+3. Create a GPG key (`gpg --full-generate-key`) and publish the public key: `gpg --keyserver keyserver.ubuntu.com --send-keys <KEY_ID>`.
+4. Add these repository secrets in GitHub:
+   - `CENTRAL_USERNAME`, `CENTRAL_PASSWORD`: the Central token pair
+   - `GPG_PRIVATE_KEY`: output of `gpg --armor --export-secret-keys <KEY_ID>`
+   - `GPG_PASSPHRASE`: the key passphrase
+
+To release: set the version in the root `pom.xml` and `base/pom.xml`, commit, then create a GitHub release. A version on Central can never be changed or removed, so bump the version for every release.
 
 ## Changing this module
 

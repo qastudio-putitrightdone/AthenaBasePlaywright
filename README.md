@@ -14,7 +14,7 @@ Add the `base` module as a dependency:
 <dependency>
     <groupId>io.github.qastudio-putitrightdone</groupId>
     <artifactId>base</artifactId>
-    <version>1.1.0</version>
+    <version>1.2.0</version>
 </dependency>
 ```
 
@@ -33,10 +33,11 @@ mvn exec:java -e -D exec.mainClass=com.microsoft.playwright.CLI -D exec.args="in
 | Class | Purpose |
 |---|---|
 | `LaunchBrowser` | Starts a browser and opens the application; optionally reuses a storage state. |
-| `BasePage` | Base class for page objects: waits, visibility checks, click/type, child locators, screenshot attachment. |
+| `BasePage` | Base class for page objects: waits, visibility checks, click/type, child locators, screenshot attachment, visual checks. |
 | `APIInterceptor` | Reads, mocks and patches API responses (see below). |
+| `VisualComparison`, `VisualOptions` | Screenshot comparison against a baseline or a stored snapshot (see below). |
 | `ReadConfigData` | Loads a properties file. |
-| `LocatorNotFoundException`, `FailedToLoadPageException` | Framework exceptions. |
+| `LocatorNotFoundException`, `FailedToLoadPageException`, `VisualMismatchException` | Framework exceptions. |
 
 ## APIInterceptor
 
@@ -101,6 +102,57 @@ APIInterceptor.clearMocks(page);   // removes every mock and patch on the page
 ```
 
 If several routes match the same URL, the most recently registered one runs first.
+
+## Visual comparison
+
+Compares screenshots pixel by pixel. Animations and the text caret are disabled during capture so runs are stable.
+
+### Baseline comparison
+
+The first run saves the screenshot as the baseline and passes. Later runs compare against it.
+
+```java
+VisualComparison.compareWithBaseline(page, "login page");               // full page
+VisualComparison.compareWithBaseline(page.locator("#header"), "header"); // one element
+
+// from a page object
+compareWithBaseline("login page");
+compareWithBaseline("#header", "header", new VisualOptions());
+```
+
+Baselines go to `src/test/resources/visual-baselines/<name>.png`. Commit them. After an intended UI change, refresh them with:
+
+```
+mvn test -DupdateBaselines=true
+```
+
+### Stored snapshot comparison
+
+Compares against a snapshot file you already keep. The file is never created or overwritten, and a missing file fails the check (the actual screenshot is saved so you can review it and put it in place).
+
+```java
+VisualComparison.compareWithSnapshot(page, Path.of("src/test/resources/snapshots/cart.png"));
+compareWithSnapshot(cartLocator, Path.of("src/test/resources/snapshots/cart.png"), new VisualOptions());
+```
+
+### Options
+
+```java
+new VisualOptions()
+        .setThreshold(0.1)                         // per-pixel color tolerance, 0 to 1 (default 0.1)
+        .setMaxDiffPixels(50)                      // allowed differing pixels (default 0)
+        .setMaxDiffPixelRatio(0.01)                // or allowed share of differing pixels (default 0)
+        .setMask(List.of(page.locator(".clock")))  // cover dynamic content
+        .setFullPage(true)                         // whole scrollable page (page screenshots only)
+        .setBaselineDir(Path.of("..."))            // or -Dvisual.baselineDir
+        .setOutputDir(Path.of("..."));             // or -Dvisual.outputDir, default target/visual-results
+```
+
+### On a mismatch
+
+Expected, actual and diff images are attached to Allure and written to `target/visual-results/`, and a `VisualMismatchException` is thrown. The diff shows changed pixels in red over a faded copy of the expected image. Different image sizes always fail.
+
+Rendering differs between operating systems and browsers (fonts, anti-aliasing), so create baselines on the same platform the tests run on in CI, or include the browser name in the baseline name.
 
 ## Releasing to Maven Central
 

@@ -7,6 +7,7 @@ import com.microsoft.playwright.options.LoadState;
 import io.qameta.allure.Allure;
 
 import java.io.ByteArrayInputStream;
+import java.nio.file.Path;
 import java.util.List;
 
 public class BasePage {
@@ -20,6 +21,40 @@ public class BasePage {
     public void attachScreenshot(Page page, String screenshotName) {
         byte[] screenshot = page.screenshot();
         Allure.addAttachment(screenshotName, "image/png", new ByteArrayInputStream(screenshot), "png");
+    }
+
+    /**
+     * Saves a baseline screenshot on the first run and compares against it on later runs.
+     */
+    public void compareWithBaseline(String baselineName) {
+        VisualComparison.compareWithBaseline(page, baselineName);
+    }
+
+    public <T> void compareWithBaseline(T arg, String baselineName, VisualOptions options) {
+        if (arg instanceof String) {
+            VisualComparison.compareWithBaseline(page.locator((String) arg), baselineName, options);
+        } else if (arg instanceof Locator) {
+            VisualComparison.compareWithBaseline((Locator) arg, baselineName, options);
+        } else if (arg instanceof Page) {
+            VisualComparison.compareWithBaseline((Page) arg, baselineName, options);
+        }
+    }
+
+    /**
+     * Compares the page against a snapshot file that is already stored. Fails if the file is missing.
+     */
+    public void compareWithSnapshot(Path snapshot) {
+        VisualComparison.compareWithSnapshot(page, snapshot);
+    }
+
+    public <T> void compareWithSnapshot(T arg, Path snapshot, VisualOptions options) {
+        if (arg instanceof String) {
+            VisualComparison.compareWithSnapshot(page.locator((String) arg), snapshot, options);
+        } else if (arg instanceof Locator) {
+            VisualComparison.compareWithSnapshot((Locator) arg, snapshot, options);
+        } else if (arg instanceof Page) {
+            VisualComparison.compareWithSnapshot((Page) arg, snapshot, options);
+        }
     }
 
     public <T> boolean isElementVisible(T arg) {
